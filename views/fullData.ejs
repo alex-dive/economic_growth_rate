@@ -1,0 +1,33 @@
+<h2>總表</h2>
+<table>
+    <thead>
+        <tr>
+            <th>年分</th>
+            <th>經濟成長率(%)</th>
+            <th>國民年均所得(USD)</th>
+            <th>儲蓄率(%)</th>
+            <th>失業率(%)</th>
+            <th>最低月薪(TWD)</th>
+            <th>最低時薪(TWD)</th>
+            <th>工商服務業平均月薪(TWD)</th>
+            <th>製造業平均月薪(TWD)</th>
+            <th>工商服務業平均工時(時/月)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for (let i = 0; i < fullData.length; i++) {//建立表格格式 %>
+        <tr><!-- 一筆json一個tr -->
+            <td><%= fullData[i].year %></td>
+            <td><%= fullData[i].economic_growth_rate %></td>
+            <td><%= fullData[i].average_gross_national_income_per_capita_usd %></td>
+            <td><%= fullData[i].savings_rate %></td>
+            <td><%= fullData[i].unemployment_rate_percent %></td>
+            <td><%= fullData[i].monthly_minimum_wage_amount %></td>
+            <td><%= fullData[i].hourly_minimum_wage_amount %></td>
+            <td><%= fullData[i].average_monthly_wage_industry_and_services_twd %></td>
+            <td><%= fullData[i].average_monthly_wage_manufacturing_twd %></td>
+            <td><%= fullData[i].average_monthly_working_hours_industry_and_services_hours %></td>
+        </tr>         
+        <% } %>
+    </tbody>
+</table>

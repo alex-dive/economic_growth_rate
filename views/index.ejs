@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/reset.css' />
+    <!-- 引入jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <!-- 引入d3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <body>
+    <div class="header">
+      <h1><%= title %></h1>
+      <p>Welcome! this is a database of <%= title %></p>
+    </div>
+    <br>
+    <div class="container">
+      <!-- 左方導覽列 -->
+      <div class="row" id="nav">
+        <ul>
+          <li><a class="homePage" href="/#">首頁</a></li>
+          <li><a class="economicsData" href="/#">經濟成長率</a></li>
+          <li><a class="GNIData" href="/#">國民年均所得</a></li>
+        </ul>
+      </div>
+      <!-- 資料呈現區塊 -->
+      <div class="row" id="chart">
+      </div>
+    </div>
+  </body>
+</html>
+<script>
+  $(document).ready(function () {
+    $.get('/fullData', function(data){//取得總表格
+      $('#chart').html(data);
+    });
+  });
+
+  // 首頁點擊事件
+  $('.homePage').click(function(){
+    $.get('/fullData', function(data){//取得總表格
+      $('#chart').html(data);
+    });
+  });
+  
+  // 經濟數據點擊事件
+  $('.economicsData').click(function(){
+    $.get('/economicsData', function(data){//取得經濟數據
+      $('#chart').html('');// 清除內容
+      $('#chart').append($('<h2>').html('經濟成長率與失業率'))
+        var dataset = [2];//將經濟成長率及失業率兩條曲線的數值整理成一個陣列
+        var temp1 = [];//經濟成長率
+        var temp2 = [];//失業率
+        for (let i = 0; i < data.length; i++) {
+          temp1[i] = {x: data[i].year, y: data[i].economic_growth_rate};
+          temp2[i] = {x: data[i].year, y: data[i].unemployment_rate};
+        }
+        dataset[0] = temp1;//經濟成長率
+        dataset[1] = temp2;//失業率
+
+        const width = 800, height = 300, margin = 25;
+        let svg = d3.select('#chart')
+                  .append('svg')
+                  .attr('width',width)
+                  .attr('height',height);
+        //建立x、y軸比例尺
+        const xScale = d3.scaleLinear().domain([data[0].year, data[data.length-1].year]).range([0, width - margin*2]);
+        const yScale = d3.scaleLinear().domain([12, -2]).range([0, height - margin*2]);
+        //繪製水平坐標軸
+        function drawXAxis() {
+          const xAxis = d3.axisBottom(xScale).ticks(27).tickFormat(function(d){return parseInt(d);});// 繪製一個朝下的平行座標線，並依據xScale換算
+          svg.append('g')
+          .attr('class','x-axis')
+          .attr('transform',`translate(${margin}, ${height - margin})`)
+          .call(xAxis);//插入svg中並平移到正確位置
+        }
+        //繪製垂直坐標軸
+        function drawYAxis() {
+          const yAxis = d3.axisLeft(yScale).ticks(14);// 繪製一個朝左的平行座標線，並依據yScale換算
+          svg.append('g')
+          .attr('class','y-axis')
+          .attr('transform',`translate(${margin}, ${margin})`)
+          .call(yAxis);//插入svg中並平移到正確位置
+        }
+        //繪製刻度線
+        function drawGrid() {
+        //在x軸畫上刻度線
+        d3.selectAll('.x-axis .tick')
+           .append('line')
+           .attr('class', 'bar')
+           .attr('id', function(d,i){return d;})
+           .attr('x1',0)
+           .attr('y1',0)
+           .attr('x2',0)
+           .attr('y2',(- height  + margin * 2))
+           .attr('stroke','#f0f0f0')
+           .attr('cursor', 'pointer')
+           .on('mouseover', function(d,i){
+            $(`.bar:not(#${d})`).css("stroke","#f0f0f0").css("stroke-width", 1);//清除其他刻度的樣式
+            $('.info').remove();//清除其他刻度的資訊欄
+            $(`line[id=${d}]`).css("stroke","black").css("stroke-width", 3)//添加樣式
+            $('#chart').append($('<div class=info>')//添加資訊
+                       .append($('<p>').html(`年分 : ${data[i].year}年`))
+                       .append($('<p>').html(`經濟成長率 : ${data[i].economic_growth_rate} %`))
+                       .append($('<p>').html(`失業率 : ${data[i].unemployment_rate} %`)));
+          })
+        }
+        //繪製折線圖
+        function drawLine(data, rgb, opacity) {
+          let line = d3.line()//將資料的座標生成一個path路徑
+          .x(function (d) {return xScale(d.x);})
+          .y(function (d) {return yScale(d.y);});
+          svg.append('path')
+            .attr('class', 'path')
+            .attr('d', line(data))
+            .attr("transform", `translate(${margin}, ${margin})`)
+            .attr('stroke', `rgb(${rgb}, ${opacity})`)
+            .attr('stroke-width',5)
+            .attr('fill', 'none');
+          //繪製折線圖上的圓點
+          svg.append('g')
+            .selectAll('circle')
+            .data(data)
+            .enter()
+            .append('circle')
+            .attr('cx', function(d) {return xScale(d.x);})
+            .attr('cy', function(d) {return yScale(d.y);})
+            .attr('r', 5)
+            .attr('transform', `translate(${margin}, ${margin})`)
+            .attr('fill', `rgb(${rgb})`)
+            .attr('stroke', '#fff')
+        }
+        
+        drawXAxis();
+        drawYAxis();
+        drawGrid();
+        drawLine(dataset[1], '50, 180, 210','0.8');//失業率
+        drawLine(dataset[0], '250, 160, 120','0.7');//經濟成長率
+        
+      });
+  });
+  
+  // 國民年均收入點擊事件
+  $('.GNIData').click(function(){
+    $.get('/GNIData', function(data){//取得國民年均收入資料
+      $('#chart').html('');// 清除內容
+      $('#chart').append($('<h2>').html('國民年均收入(USD)'))
+      const width = 800, height = 300, margin = 25;
+      let svg = d3.select('#chart')
+                  .append('svg')
+                  .attr('width',width)
+                  .attr('height',height);
+      //建立x、y軸比例尺
+      const xScale = d3.scaleLinear().domain([data[0].year, data[data.length-1].year]).range([0, width - margin*2]);
+      const yScale = d3.scaleLinear().domain([35,0]).range([0, height - margin*2]);
+      
+      //繪製水平坐標軸
+      function drawXAxis() {
+        const xAxis = d3.axisBottom(xScale).ticks(27).tickFormat(function(d){return d;});// 繪製一個朝下的平行座標線，並依據xScale換算
+        svg.append('g')
+        .attr('class','x-axis')
+        .attr('transform',`translate(${margin}, ${height - margin})`)
+        .call(xAxis);//插入svg中並平移到正確位置
+      }
+ 
+      //繪製垂直坐標軸
+      function drawYAxis() {
+        const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(function(d){return d+'k';});// 繪製一個朝左的平行座標線，並依據yScale換算
+        svg.append('g')
+        .attr('class','y-axis')
+        .attr('transform',`translate(${margin}, ${margin})`)
+        .call(yAxis);//插入svg中並平移到正確位置
+      }
+
+      //繪製長條圖
+      function drawBar(data, rgb){
+        const bar = svg.selectAll("rect")
+              .data(data)
+              .join("rect")
+              .attr('class', 'bar')
+              .attr('id', function(d,i){return d.year;})
+              .attr("x", function(d, i){return (width-margin)/data.length*i+margin;}) // 調整長條圖位置
+              .attr("y", function(d){
+                return height - parseFloat(d.GNI/35000*height);})
+              .attr("width", 20)
+              .attr("height", d => {
+                  return parseFloat(d.GNI/35000*height)-margin;})
+              .attr("fill", `rgb(${rgb})`)
+              .attr('cursor', 'pointer') 
+              .on('mouseover', function(d,i){
+                $(`#${d.year}`).css("opacity","0.5");//添加樣式
+                $('.info').remove();//清除其他年分資料的資訊欄
+                $('#chart').append($('<div class=info>')//添加資訊
+                          .append($('<p>').html(`年分 : ${data[i].year}年`))
+                          .append($('<p>').html(`國民年均所得 : ${data[i].GNI} USD`))
+                          .append($('<p>').html(`儲蓄率 : ${data[i].savings_rate} %`)));
+              })
+              .on('mouseleave', function(d,i){
+                $(`#${d.year}`).css("opacity","1");//添加樣式
+              })
+      }
+
+      drawXAxis();
+      drawYAxis();
+      drawBar(data, '230, 125, 80');
+    });
+  });
+</script>

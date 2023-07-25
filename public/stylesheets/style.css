@@ -1,0 +1,96 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: rgb(254, 221, 143);
+}
+.header{
+  font-size: larger;
+  font-family: Comic Sans MS;
+  background: linear-gradient(to right, rgb(254, 221, 143), rgb(249, 198, 79), rgb(249, 198, 79), rgb(249, 198, 79), rgb(253, 207, 98), rgb(254, 221, 143), rgb(254, 221, 143));
+  padding: 25px 25px;
+  padding-left: 75px;
+}
+.info{
+  display: block;
+  text-align: left;
+  font-size: small;
+}
+
+.container{
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+}
+#nav{
+  display: inline-block;
+  background-color: rgb(180, 180, 180, 0.7);
+  width: 160px;
+}
+#chart{
+  text-align: center;
+  display: inline-block;
+  background-color: rgb(210, 210, 210, 0.5);
+  width: 75%;
+  padding: 25px 50px;
+}
+.row{
+  vertical-align: top;
+}
+
+/* 導覽列樣式設計 */
+ul{
+  padding-inline-start: 30px;
+}
+li{
+  list-style-type: none;
+}
+a{
+  display: block;
+}
+a:link{  /* 設定還沒有瀏覽過的連結 */
+  text-decoration:none;
+}
+a:visited {  /* 設定已經瀏覽過的連結 */
+  color:black;
+}
+a:hover {  /* 設定滑鼠移經的連結 */
+  background-color:#fafafa;
+  color:gray;
+}
+a:active {  /* 設定正在點選的連結 */
+  background-color:gray;
+  color:#fafafa;
+}
+
+/* 表格樣式設計 */
+table{
+  border-collapse:collapse;
+}
+th{
+  background-color:hsl(50, 84%, 77%);
+  width:25vw;
+  height:75px;
+}
+td{
+  background-color:hwb(39 14% 26%);
+  color:#ffffff;
+  width:25vw;
+  height:50px;
+  text-align:center;
+}
+tr:hover td{
+  background-color:#2a2a2a;
+    transition: all 0.3s ease-in-out;
+}
+tr td:first-child{
+  color:rgba(74, 231, 255, 0.719);
+  font-weight: bold;
+}
+tr{
+  border-bottom: 1px solid #2a2a2a;
+}
+
+/* 設定SVG樣式 */
+svg{
+  background-color: hsl(50, 84%, 77%);
+}
